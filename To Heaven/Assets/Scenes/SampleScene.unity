@@ -437,6 +437,9 @@ MonoBehaviour:
   mapWith: 100
   mapHeight: 100
   scale: 0.16
+  octaves: 0
+  persistance: 0
+  lacunarity: 0
   autoUpdate: 1
 --- !u!4 &1888923587
 Transform:
