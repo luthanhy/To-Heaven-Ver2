@@ -7,6 +7,8 @@ public class MapGenerator : MonoBehaviour
     public int mapWith;
     public int mapHeight;
     public float scale;
+    public bool autoUpdate;
+
     public void GeneratorMap(){
         float [,] noiseMap = Noise.GeneratorNoise(mapWith,mapHeight,scale);
 
