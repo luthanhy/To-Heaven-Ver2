@@ -66,6 +66,7 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Map\MapDisPlay.cs" />
     <Compile Include="Assets\Scripts\Map\Noise.cs" />
+    <Compile Include="Assets\Scripts\Map\TextureGenerator.cs" />
     <Compile Include="Assets\Scripts\Map\MapGenerator.cs" />
   </ItemGroup>
   <ItemGroup>
