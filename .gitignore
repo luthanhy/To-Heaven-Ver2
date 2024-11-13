@@ -4,3 +4,7 @@ To Heaven/Temp/
 To Heaven/Obj/
 To Heaven/Build/
 To Heaven/Builds/
+*.csproj
+.idea
+.sln
+*.meta
