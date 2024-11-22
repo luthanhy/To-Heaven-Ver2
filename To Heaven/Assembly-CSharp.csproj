@@ -60,10 +60,17 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.50f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Traps\RockRope\ActivateSwingTrap.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToColumn.cs" />
     <Compile Include="Assets\Scripts\Map\MapDisPlay.cs" />
     <Compile Include="Assets\Scripts\Map\Noise.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\SwingColumn.cs" />
     <Compile Include="Assets\Scripts\Player\MouseMovement.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToSurface.cs" />
+    <Compile Include="Assets\Scripts\Traps\RockRope\KnockbackTrap.cs" />
+    <Compile Include="Assets\Scripts\Traps\RockRope\SwingTrap.cs" />
     <Compile Include="Assets\Scripts\Map\MapGenerator.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\FlyLandMovement.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
   </ItemGroup>
   <ItemGroup>
