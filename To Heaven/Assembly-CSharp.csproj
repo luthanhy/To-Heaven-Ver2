@@ -62,9 +62,11 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Traps\RockRope\ActivateSwingTrap.cs" />
     <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToColumn.cs" />
+    <Compile Include="Assets\Scripts\Traps\RolateBoard\RolateBoard.cs" />
     <Compile Include="Assets\Scripts\Map\MapDisPlay.cs" />
     <Compile Include="Assets\Scripts\Map\Noise.cs" />
     <Compile Include="Assets\Scripts\Traps\RopeHighRope\SwingColumn.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\RockPathGenerator.cs" />
     <Compile Include="Assets\Scripts\Player\MouseMovement.cs" />
     <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToSurface.cs" />
     <Compile Include="Assets\Scripts\Traps\RockRope\KnockbackTrap.cs" />

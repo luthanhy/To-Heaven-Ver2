@@ -1,107 +1,174 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Components")]
     public CharacterController controller;
     public Animator animator;
 
-    public float speed = 6f;         // Walking speed
-    public float runSpeed = 12f;     // Running speed
-    public float gravity = -9.81f * 2;
-    public float jumpHeight = 3f;
+    [Header("Movement Settings")]
+    public float speed = 6f;             // Tốc độ đi bộ
+    public float runSpeed = 12f;         // Tốc độ chạy
+    public float gravity = -9.81f * 2;   // Trọng lực
+    public float jumpHeight = 3f;        // Chiều cao nhảy
 
+    [Header("Ground Check")]
     public Transform groundCheck;
     public float groundDistance = 0.4f;
     public LayerMask groundMask;
 
-    // Reference to the camera
+    [Header("Camera")]
     public Transform cameraTransform;
 
-    // Smoothing variable for rotation
+    [Header("Rotation Settings")]
     public float turnSmoothTime = 0.1f;
-    float turnSmoothVelocity;
+    private float turnSmoothVelocity;
 
-    Vector3 velocity;
-    bool isGrounded;
+    private Vector3 velocity;
+    private bool isGrounded;
+
+    private SwingColumn currentPlatform; // Tham chiếu đến cầu xoay hiện tại
 
     void Update()
     {
-        // Check if the player is on the ground
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
+        HandleGroundCheck();
+        HandleMovement();
+        HandleJump();
+        ApplyGravity();
+        MoveWithPlatform();
+    }
 
-        // Update Animator parameter for grounded state
+    // Kiểm tra xem nhân vật có đang trên mặt đất không
+    void HandleGroundCheck()
+    {
+        isGrounded = controller.isGrounded;
+
+        // Cập nhật tham số Animator cho trạng thái trên mặt đất
         animator.SetBool("isGrounded", isGrounded);
 
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f; // Small value to keep the player on the ground without a hard impact
+            velocity.y = -2f; // Giá trị nhỏ để giữ nhân vật trên mặt đất
         }
+    }
 
-        // Get player input for movement
+    // Xử lý chuyển động của nhân vật
+    void HandleMovement()
+    {
+        // Lấy input từ người chơi
         float x = Input.GetAxis("Horizontal");
         float z = Input.GetAxis("Vertical");
 
-        // Calculate movement direction based on camera orientation
+        // Tính toán hướng di chuyển dựa trên camera
         Vector3 direction = new Vector3(x, 0f, z).normalized;
 
-        // Only proceed if there's movement input
+        // Chỉ tiến hành nếu có input
         if (direction.magnitude >= 0.1f)
         {
-            // Calculate the target rotation based on camera and input
+            // Tính góc xoay mục tiêu dựa trên hướng di chuyển và camera
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
 
-            // Rotate the player to face the direction of movement
+            // Xoay nhân vật theo hướng di chuyển
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
-            // Determine movement direction and speed
+            // Xác định hướng di chuyển
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
+            // Xác định tốc độ hiện tại (đi bộ hoặc chạy)
             bool isRunning = Input.GetKey(KeyCode.LeftShift);
             float currentSpeed = isRunning ? runSpeed : speed;
 
-            // Determine if moving forward or backward
-            if (z < 0) // Moving backward
+            // Xác định trạng thái Animator dựa trên hướng di chuyển
+            if (z < 0) // Di chuyển lùi
             {
-                currentSpeed = speed; // Set to walking speed for backward movement
+                currentSpeed = speed; // Tốc độ đi bộ cho di chuyển lùi
                 animator.SetBool("isWalkingBackward", true);
                 animator.SetBool("isWalking", false);
                 animator.SetBool("isRunning", false);
             }
-            else // Moving forward
+            else // Di chuyển tiến
             {
                 animator.SetBool("isWalkingBackward", false);
                 animator.SetBool("isWalking", !isRunning);
                 animator.SetBool("isRunning", isRunning);
             }
 
-            // Move the player
+            // Di chuyển nhân vật
             controller.Move(moveDir.normalized * currentSpeed * Time.deltaTime);
-
-            // Debugging log
-            Debug.Log("Walking: " + animator.GetBool("isWalking") + ", Running: " + animator.GetBool("isRunning") + ", Walking Backward: " + animator.GetBool("isWalkingBackward"));
         }
         else
         {
-            // No input: transition to idle
+            // Không có input: chuyển sang trạng thái idle
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", false);
             animator.SetBool("isWalkingBackward", false);
         }
+    }
 
-        // Jump handling
+    // Xử lý nhảy
+    void HandleJump()
+    {
         if (Input.GetButtonDown("Jump") && isGrounded)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetTrigger("Jump");
         }
+    }
 
-        // Apply gravity
+    // Áp dụng trọng lực
+    void ApplyGravity()
+    {
         velocity.y += gravity * Time.deltaTime;
-
-        // Move player vertically (gravity effect)
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    // Di chuyển nhân vật cùng với cầu xoay
+    void MoveWithPlatform()
+    {
+        if (currentPlatform != null)
+        {
+            Vector3 platformVelocity = currentPlatform.GetPlatformVelocity(transform.position);
+
+            // Giới hạn vận tốc tối đa
+            float maxPlatformSpeed = 5f; // Bạn có thể điều chỉnh giá trị này
+            if (platformVelocity.magnitude > maxPlatformSpeed)
+            {
+                platformVelocity = platformVelocity.normalized * maxPlatformSpeed;
+            }
+
+            // Áp dụng vận tốc đã được giới hạn lên nhân vật
+            controller.Move(platformVelocity * Time.deltaTime);
+
+            // Mô phỏng ma sát bằng cách giảm vận tốc ngang của nhân vật
+            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
+            float friction = 5f; // Giá trị ma sát, bạn có thể điều chỉnh
+            horizontalVelocity = Vector3.Lerp(horizontalVelocity, Vector3.zero, friction * Time.deltaTime);
+
+            velocity.x = horizontalVelocity.x;
+            velocity.z = horizontalVelocity.z;
+        }
+    }
+
+
+
+
+    // Xử lý va chạm với cầu xoay
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        // Kiểm tra nếu nhân vật đang đứng trên cầu xoay (kiểm tra góc va chạm)
+        if (hit.collider.CompareTag("SwingPlatform"))
+        {
+            // Kiểm tra góc va chạm để xác định xem nhân vật có đang đứng trên cầu không
+            if (hit.normal.y > 0.5f)
+            {
+                currentPlatform = hit.collider.GetComponent<SwingColumn>();
+            }
+        }
+        else
+        {
+            // Nếu không va chạm với cầu xoay, đặt currentPlatform về null
+            currentPlatform = null;
+        }
     }
 }

@@ -2,15 +2,26 @@
 
 public class SwingColumn : MonoBehaviour
 {
-    public float swingSpeed = 2f; // Tốc độ đung đưa
-    public float swingAngle = 30f; // Góc tối đa đung đưa
+    public float rotationSpeed = 30f; // Tốc độ xoay (độ/giây)
 
-    private float timer = 0f;
+    // Hàm tính vận tốc góc (rad/s)
+    public Vector3 GetAngularVelocity()
+    {
+        return Vector3.up * rotationSpeed * Mathf.Deg2Rad;
+    }
+
+    // Hàm tính vận tốc tuyến tính tại một điểm do xoay
+    public Vector3 GetPlatformVelocity(Vector3 point)
+    {
+        Vector3 angularVelocity = GetAngularVelocity();
+        Vector3 r = point - transform.position;
+        Vector3 velocity = Vector3.Cross(angularVelocity, r);
+        return velocity;
+    }
 
     void Update()
     {
-        timer += Time.deltaTime * swingSpeed;
-        float angle = Mathf.Sin(timer) * swingAngle; // Dùng hàm Sin để tính góc đung đưa
-        transform.rotation = Quaternion.Euler(new Vector3(angle, 0, 0)); // Xoay theo trục X
+        // Xoay cầu quanh trục Y
+        transform.Rotate(Vector3.up, rotationSpeed * Time.deltaTime, Space.Self);
     }
 }
