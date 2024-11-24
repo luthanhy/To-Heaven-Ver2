@@ -29,6 +29,18 @@ public class PlayerMovement : MonoBehaviour
 
     private SwingColumn currentPlatform; // Tham chiếu đến cầu xoay hiện tại
 
+    // Biến lưu vị trí bắt đầu để hồi sinh
+    private Vector3 startingPosition;
+
+    // Biến kiểm tra trạng thái rơi
+    private bool isFalling = false;
+
+    void Start()
+    {
+        // Lưu vị trí ban đầu của nhân vật
+        startingPosition = transform.position;
+    }
+
     void Update()
     {
         HandleGroundCheck();
@@ -36,6 +48,7 @@ public class PlayerMovement : MonoBehaviour
         HandleJump();
         ApplyGravity();
         MoveWithPlatform();
+        HandleFallingAndRespawn(); // Thêm hàm xử lý rơi và hồi sinh
     }
 
     // Kiểm tra xem nhân vật có đang trên mặt đất không
@@ -109,7 +122,7 @@ public class PlayerMovement : MonoBehaviour
     // Xử lý nhảy
     void HandleJump()
     {
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetButtonDown("Jump") && isGrounded && !isFalling)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
             animator.SetTrigger("Jump");
@@ -150,9 +163,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
-
-
     // Xử lý va chạm với cầu xoay
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
@@ -170,5 +180,58 @@ public class PlayerMovement : MonoBehaviour
             // Nếu không va chạm với cầu xoay, đặt currentPlatform về null
             currentPlatform = null;
         }
+    }
+
+    // Hàm xử lý trạng thái rơi và hồi sinh
+    void HandleFallingAndRespawn()
+    {
+        // Kiểm tra trạng thái rơi
+        if (!isGrounded && velocity.y < 0)
+        {
+            if (!isFalling)
+            {
+                StartFalling();
+            }
+        }
+        else
+        {
+            if (isFalling)
+            {
+                StopFalling();
+            }
+        }
+
+        // Kiểm tra nếu nhân vật rơi xuống quá thấp
+        if (transform.position.y < -30f)
+        {
+            Respawn();
+        }
+    }
+
+    void StartFalling()
+    {
+        isFalling = true;
+        animator.SetBool("isFalling", true);
+    }
+
+    void StopFalling()
+    {
+        isFalling = false;
+        animator.SetBool("isFalling", false);
+    }
+
+    void Respawn()
+    {
+        // Đưa nhân vật về vị trí ban đầu
+        controller.enabled = false;
+        transform.position = startingPosition;
+        controller.enabled = true;
+
+        // Reset vận tốc
+        velocity = Vector3.zero;
+
+        // Đặt trạng thái rơi về false
+        isFalling = false;
+        animator.SetBool("isFalling", false);
     }
 }
