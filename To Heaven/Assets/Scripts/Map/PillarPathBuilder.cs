@@ -25,7 +25,7 @@ public class PillarPathBuilder : MonoBehaviour
             float tiltAngle = Random.Range(-maxTiltAngle, maxTiltAngle);
 
             // Áp dụng góc nghiêng vào trục Z để nghiêng trái phải
-            Quaternion tiltRotation = Quaternion.Euler(0, 0, tiltAngle);
+            Quaternion tiltRotation = Quaternion.Euler(tiltAngle, 0, 0);
 
             // Tạo trụ
             GameObject pillar = Instantiate(pillarPrefab, currentPosition, tiltRotation, transform);

@@ -234,4 +234,14 @@ public class PlayerMovement : MonoBehaviour
         isFalling = false;
         animator.SetBool("isFalling", false);
     }
+    public void LaunchPlayer(float forceUp, float forceForward)
+    {
+        velocity.y = Mathf.Sqrt(forceUp * -2f * gravity);
+        Vector3 forwardDirection = transform.forward;
+        Vector3 horizontalVelocity = forwardDirection * forceForward;
+        controller.Move(horizontalVelocity * Time.deltaTime);
+        animator.SetTrigger("Launch");
+    }
+    
+
 }

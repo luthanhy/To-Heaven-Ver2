@@ -1,23 +1,27 @@
 ﻿using UnityEngine;
 
-public class RotateAroundCenter : MonoBehaviour
+public class RotateBoardAroundCenter : MonoBehaviour
 {
-    public Transform centerPoint; // Điểm trung tâm để xoay quanh
-    public float rotationSpeed = 100f; // Tốc độ xoay
-    public bool clockwise = true; // Xoay theo chiều kim đồng hồ
+    public Transform rotateBoard; // Tấm ván đá
+    public Transform centerPoint; // Điểm trung tâm
+    public float rotationSpeed = 10f; // Tốc độ quay
+    public Vector3 rotationAxis = Vector3.forward; // Trục quay (mặc định là Z)
 
     void Update()
     {
-        if (centerPoint == null)
+        if (rotateBoard != null && centerPoint != null)
         {
-            Debug.LogWarning("Center point is not set!");
-            return;
+            // Lưu khoảng cách giữa tấm ván và tâm quay
+            Vector3 offset = rotateBoard.position - centerPoint.position;
+
+            // Xoay offset xung quanh tâm theo trục được chỉ định
+            offset = Quaternion.AngleAxis(rotationSpeed * Time.deltaTime, rotationAxis) * offset;
+
+            // Cập nhật vị trí mới của tấm ván
+            rotateBoard.position = centerPoint.position + offset;
+
+            // Đảm bảo tấm ván giữ hướng phù hợp
+            rotateBoard.rotation = Quaternion.LookRotation(rotationAxis, centerPoint.position - rotateBoard.position);
         }
-
-        // Tính toán hướng xoay (clockwise hoặc counterclockwise)
-        float direction = clockwise ? -1f : 1f;
-
-        // Xoay đối tượng quanh trục Z của centerPoint
-        transform.RotateAround(centerPoint.position, Vector3.forward, rotationSpeed * direction * Time.deltaTime);
     }
 }

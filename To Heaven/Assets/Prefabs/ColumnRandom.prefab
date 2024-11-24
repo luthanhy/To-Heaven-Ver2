@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5332408800939591233}
-  - component: {fileID: 5410515636429576221}
+  - component: {fileID: 6007124544315744170}
   m_Layer: 0
   m_Name: ColumnRandom
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 183.962, z: 0}
---- !u!114 &5410515636429576221
+--- !u!114 &6007124544315744170
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,10 +41,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 4279890015933755931}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8e60e2dfcbea8d9438d660de6fedb792, type: 3}
+  m_Script: {fileID: 11500000, guid: 0e440accba8d3974b92a3fbc2d6cd8fe, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pillarPrefab: {fileID: 0}
+  pillarPrefab: {fileID: 6606111324181798485, guid: 72e3df83e6414a2499e61db1cc738b47, type: 3}
   pillarCount: 6
-  distanceBetweenPillars: 15
+  distanceBetweenPillars: 10
+  heightIncrement: 3
   maxTiltAngle: 30
