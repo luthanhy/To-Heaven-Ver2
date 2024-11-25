@@ -16,8 +16,17 @@ public class SwingColumn : MonoBehaviour
         Vector3 angularVelocity = GetAngularVelocity();
         Vector3 r = point - transform.position;
         Vector3 velocity = Vector3.Cross(angularVelocity, r);
+
+        // Giới hạn vận tốc tối đa
+        float maxPlatformSpeed = 5f; // Điều chỉnh giá trị này phù hợp
+        if (velocity.magnitude > maxPlatformSpeed)
+        {
+            velocity = velocity.normalized * maxPlatformSpeed;
+        }
+
         return velocity;
     }
+
 
     void Update()
     {

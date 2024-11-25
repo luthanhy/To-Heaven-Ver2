@@ -27,13 +27,17 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 velocity;
     private bool isGrounded;
 
-    private SwingColumn currentPlatform; // Tham chiếu đến cầu xoay hiện tại
+    private SwingColumn currentSwingPlatform; // Tham chiếu đến cầu xoay hiện tại
+    private PlaneMoveForward currentMovingPlatform; // Tham chiếu đến mặt phẳng di chuyển hiện tại
 
     // Biến lưu vị trí bắt đầu để hồi sinh
     private Vector3 startingPosition;
 
     // Biến kiểm tra trạng thái rơi
     private bool isFalling = false;
+
+    // Biến lưu hướng di chuyển
+    private Vector3 moveDirection;
 
     void Start()
     {
@@ -47,22 +51,94 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
         HandleJump();
         ApplyGravity();
-        MoveWithPlatform();
-        HandleFallingAndRespawn(); // Thêm hàm xử lý rơi và hồi sinh
+        HandleFallingAndRespawn();
+
+        // Tính toán chuyển động tổng
+        Vector3 totalMovement = (moveDirection + velocity) * Time.deltaTime;
+
+
+        if (currentSwingPlatform != null)
+        {
+            Vector3 swingPlatformVelocity = currentSwingPlatform.GetPlatformVelocity(transform.position);
+
+            if (!isGrounded)
+            {
+                // Loại bỏ vận tốc thẳng đứng của cầu xoay khi nhân vật đang trên không
+                swingPlatformVelocity.y = 0;
+            }
+
+            // Giới hạn vận tốc tối đa
+            float maxSwingSpeed = 5f; // Điều chỉnh giá trị này phù hợp
+            if (swingPlatformVelocity.magnitude > maxSwingSpeed)
+            {
+                swingPlatformVelocity = swingPlatformVelocity.normalized * maxSwingSpeed;
+            }
+
+            totalMovement += swingPlatformVelocity * Time.deltaTime;
+        }
+
+
+        // Thêm chuyển động của mặt phẳng di chuyển (nếu có)
+        if (currentMovingPlatform != null)
+        {
+            Vector3 movingPlatformVelocity = currentMovingPlatform.GetPlatformVelocity();
+
+            if (!isGrounded)
+            {
+                // Loại bỏ vận tốc thẳng đứng của mặt phẳng khi nhân vật đang trên không
+                movingPlatformVelocity.y = 0;
+            }
+
+            totalMovement += movingPlatformVelocity * Time.deltaTime;
+        }
+
+        // Di chuyển nhân vật
+        controller.Move(totalMovement);
     }
 
-    // Kiểm tra xem nhân vật có đang trên mặt đất không
     void HandleGroundCheck()
     {
-        isGrounded = controller.isGrounded;
+        // Thực hiện Raycast xuống dưới để kiểm tra mặt đất
+        RaycastHit hit;
+        float raycastDistance = controller.height / 2 + 0.1f;
+
+        if (Physics.SphereCast(transform.position, controller.radius, Vector3.down, out hit, raycastDistance, groundMask))
+        {
+            isGrounded = true;
+
+            // Kiểm tra nếu đang đứng trên mặt phẳng di chuyển
+            if (hit.collider.CompareTag("MovingPlatform"))
+            {
+                currentMovingPlatform = hit.collider.GetComponent<PlaneMoveForward>();
+                currentSwingPlatform = null;
+            }
+            // Kiểm tra nếu đang đứng trên cầu xoay
+            else if (hit.collider.CompareTag("SwingPlatform"))
+            {
+                currentSwingPlatform = hit.collider.GetComponent<SwingColumn>();
+                currentMovingPlatform = null;
+            }
+            else
+            {
+                currentMovingPlatform = null;
+                currentSwingPlatform = null;
+            }
+        }
+        else
+        {
+            isGrounded = false;
+            currentMovingPlatform = null;
+            currentSwingPlatform = null;
+        }
+
+        // Áp dụng giá trị vận tốc Y nhỏ để giữ nhân vật trên mặt đất
+        if (isGrounded && velocity.y < 0)
+        {
+            velocity.y = -2f;
+        }
 
         // Cập nhật tham số Animator cho trạng thái trên mặt đất
         animator.SetBool("isGrounded", isGrounded);
-
-        if (isGrounded && velocity.y < 0)
-        {
-            velocity.y = -2f; // Giá trị nhỏ để giữ nhân vật trên mặt đất
-        }
     }
 
     // Xử lý chuyển động của nhân vật
@@ -107,8 +183,8 @@ public class PlayerMovement : MonoBehaviour
                 animator.SetBool("isRunning", isRunning);
             }
 
-            // Di chuyển nhân vật
-            controller.Move(moveDir.normalized * currentSpeed * Time.deltaTime);
+            // Lưu hướng di chuyển
+            moveDirection = moveDir.normalized * currentSpeed;
         }
         else
         {
@@ -116,6 +192,9 @@ public class PlayerMovement : MonoBehaviour
             animator.SetBool("isWalking", false);
             animator.SetBool("isRunning", false);
             animator.SetBool("isWalkingBackward", false);
+
+            // Đặt hướng di chuyển về zero
+            moveDirection = Vector3.zero;
         }
     }
 
@@ -132,55 +211,33 @@ public class PlayerMovement : MonoBehaviour
     // Áp dụng trọng lực
     void ApplyGravity()
     {
-        velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
-    }
-
-    // Di chuyển nhân vật cùng với cầu xoay
-    void MoveWithPlatform()
-    {
-        if (currentPlatform != null)
+        if (!isGrounded)
         {
-            Vector3 platformVelocity = currentPlatform.GetPlatformVelocity(transform.position);
-
-            // Giới hạn vận tốc tối đa
-            float maxPlatformSpeed = 5f; // Bạn có thể điều chỉnh giá trị này
-            if (platformVelocity.magnitude > maxPlatformSpeed)
-            {
-                platformVelocity = platformVelocity.normalized * maxPlatformSpeed;
-            }
-
-            // Áp dụng vận tốc đã được giới hạn lên nhân vật
-            controller.Move(platformVelocity * Time.deltaTime);
-
-            // Mô phỏng ma sát bằng cách giảm vận tốc ngang của nhân vật
-            Vector3 horizontalVelocity = new Vector3(velocity.x, 0f, velocity.z);
-            float friction = 5f; // Giá trị ma sát, bạn có thể điều chỉnh
-            horizontalVelocity = Vector3.Lerp(horizontalVelocity, Vector3.zero, friction * Time.deltaTime);
-
-            velocity.x = horizontalVelocity.x;
-            velocity.z = horizontalVelocity.z;
+            velocity.y += gravity * Time.deltaTime;
+        }
+        else if (velocity.y < 0)
+        {
+            velocity.y = -2f;
         }
     }
 
-    // Xử lý va chạm với cầu xoay
+
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        // Kiểm tra nếu nhân vật đang đứng trên cầu xoay (kiểm tra góc va chạm)
         if (hit.collider.CompareTag("SwingPlatform"))
         {
-            // Kiểm tra góc va chạm để xác định xem nhân vật có đang đứng trên cầu không
+            // Nếu nhân vật va chạm với cầu xoay
             if (hit.normal.y > 0.5f)
             {
-                currentPlatform = hit.collider.GetComponent<SwingColumn>();
+                currentSwingPlatform = hit.collider.GetComponent<SwingColumn>();
             }
         }
         else
         {
-            // Nếu không va chạm với cầu xoay, đặt currentPlatform về null
-            currentPlatform = null;
+            currentSwingPlatform = null;
         }
     }
+
 
     // Hàm xử lý trạng thái rơi và hồi sinh
     void HandleFallingAndRespawn()
@@ -193,7 +250,7 @@ public class PlayerMovement : MonoBehaviour
                 StartFalling();
             }
         }
-        else
+        else if (isGrounded)
         {
             if (isFalling)
             {
@@ -234,14 +291,13 @@ public class PlayerMovement : MonoBehaviour
         isFalling = false;
         animator.SetBool("isFalling", false);
     }
+
     public void LaunchPlayer(float forceUp, float forceForward)
     {
         velocity.y = Mathf.Sqrt(forceUp * -2f * gravity);
         Vector3 forwardDirection = transform.forward;
         Vector3 horizontalVelocity = forwardDirection * forceForward;
-        controller.Move(horizontalVelocity * Time.deltaTime);
+        moveDirection += horizontalVelocity;
         animator.SetTrigger("Launch");
     }
-    
-
 }
