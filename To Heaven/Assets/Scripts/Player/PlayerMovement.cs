@@ -262,6 +262,11 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        if (other.CompareTag("Lava")) // Check if the collider is tagged as Lava
+        {
+            Respawn(); // Call the Respawn method
+        }
+
         if (hit.collider.CompareTag("SwingPlatform"))
         {
             // Nếu nhân vật va chạm với cầu xoay
