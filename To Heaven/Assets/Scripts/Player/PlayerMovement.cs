@@ -20,6 +20,13 @@ public class PlayerMovement : MonoBehaviour
     [Header("Camera")]
     public Transform cameraTransform;
 
+    [Header("Audio")]
+    public AudioSource audioSource;             // Nguồn âm thanh cho âm thanh lặp
+    public AudioSource oneShotAudioSource;      // Nguồn âm thanh cho âm thanh một lần
+    public AudioClip walkSound;                 // Âm thanh đi bộ
+    public AudioClip jumpSound;                 // Âm thanh nhảy
+    public AudioClip landSound;                 // Âm thanh chạm đất
+
     [Header("Rotation Settings")]
     public float turnSmoothTime = 0.1f;
     private float turnSmoothVelocity;
@@ -186,14 +193,56 @@ public class PlayerMovement : MonoBehaviour
                 animator.SetBool("isRunning", false);
             }
         }
+
+        // Xử lý âm thanh đi bộ và chạy
+        if (isGrounded && moveDirection.magnitude > 0f)
+        {
+            if (Input.GetKey(KeyCode.LeftShift)) // Chạy
+            {
+                if (!audioSource.isPlaying || audioSource.clip != walkSound || audioSource.pitch != 1f)
+                {
+                    audioSource.Stop();
+                    audioSource.clip = walkSound;
+                    audioSource.pitch = 1f;
+                    audioSource.loop = true;
+                    audioSource.Play();
+                }
+            }
+            else // Đi bộ
+            {
+                if (!audioSource.isPlaying || audioSource.clip != walkSound || audioSource.pitch != 0.6f)
+                {
+                    audioSource.Stop();
+                    audioSource.clip = walkSound;
+                    audioSource.pitch = 0.6f;
+                    audioSource.loop = true;
+                    audioSource.Play();
+                }
+            }
+        }
+        else
+        {
+            // Dừng âm thanh nếu không di chuyển
+            if (audioSource.isPlaying)
+            {
+                audioSource.Stop();
+            }
+        }
     }
 
-    // Xử lý nhảy
     void HandleJump()
     {
         if (Input.GetButtonDown("Jump") && isGrounded && !isFalling)
         {
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+            if (jumpSound != null)
+            {
+                // Không gọi audioSource.Stop() ở đây
+                oneShotAudioSource.PlayOneShot(jumpSound);
+            }
+
+            // Kích hoạt animation nhảy
             animator.SetTrigger("Jump");
         }
     }
@@ -261,6 +310,10 @@ public class PlayerMovement : MonoBehaviour
 
     void StopFalling()
     {
+        if (landSound != null)
+        {
+            oneShotAudioSource.PlayOneShot(landSound);
+        }
         isFalling = false;
         animator.SetBool("isFalling", false);
     }

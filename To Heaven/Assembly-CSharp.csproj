@@ -84,10 +84,12 @@
     <Compile Include="Assets\Scripts\Map\TerrainChunk.cs" />
     <Compile Include="Assets\Scripts\FlyLand\RockPathGenerator.cs" />
     <Compile Include="Assets\Scripts\Player\MouseMovement.cs" />
+    <Compile Include="Assets\Scripts\Traps\PillarPathBuilder.cs" />
     <Compile Include="Assets\Scripts\Map\HideOnPlay.cs" />
     <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToSurface.cs" />
     <Compile Include="Assets\Scripts\Traps\RockRope\KnockbackTrap.cs" />
     <Compile Include="Assets\Scripts\Traps\RockRope\SwingTrap.cs" />
+    <Compile Include="Assets\Scripts\Traps\RandomPathGenerator.cs" />
     <Compile Include="Assets\Scripts\FlyLand\FlyLandMovement.cs" />
     <Compile Include="Assets\Scripts\FlyLand\RockController.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
