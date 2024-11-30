@@ -1,10 +1,22 @@
+# Thư mục Unity tạm thời và không cần thiết
 To Heaven/Library/
 To Heaven/Logs/
 To Heaven/Temp/
 To Heaven/Obj/
 To Heaven/Build/
 To Heaven/Builds/
+
+# File IDE và project
 *.csproj
-.idea
-.sln
+*.sln
 *.meta
+*.unityproj
+
+# Cấu hình cho các IDE
+.idea/
+.vscode/
+*.userprefs
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db

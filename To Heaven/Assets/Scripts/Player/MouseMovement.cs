@@ -26,7 +26,7 @@ public class ThirdPersonCamera : MonoBehaviour
         // Cập nhật góc xoay dựa trên chuyển động chuột
         yRotation += mouseX;
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -35f, 60f); // Giới hạn góc nhìn lên/xuống
+        xRotation = Mathf.Clamp(xRotation, -60f, 60f); // Giới hạn góc nhìn lên/xuống
 
         // Tính toán hướng xoay
         Quaternion rotation = Quaternion.Euler(xRotation, yRotation, 0);
