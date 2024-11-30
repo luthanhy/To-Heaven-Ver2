@@ -64,13 +64,41 @@
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\2022.3.50f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Scripts\Traps\RockRope\ActivateSwingTrap.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToColumn.cs" />
+    <Compile Include="Assets\Scripts\Traps\RolateBoard\RolateBoard.cs" />
+    <Compile Include="Assets\Scripts\Traps\BouncePad.cs" />
     <Compile Include="Assets\Scripts\Map\MeshGenerator.cs" />
-    <Compile Include="Assets\Scripts\Map\MapDisPlay.cs" />
+    <Compile Include="Assets\Scripts\Map\FalloffGenerator.cs" />
+    <Compile Include="Assets\Scripts\Map\ThreadedDataRequester.cs" />
+    <Compile Include="Assets\Scripts\Map\HeightMapGenerator.cs" />
+    <Compile Include="Assets\Scripts\Traps\PlaneMoveForward.cs" />
+    <Compile Include="Assets\Scripts\Map\Data\TextureData.cs" />
     <Compile Include="Assets\Scripts\Map\Noise.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\SwingColumn.cs" />
     <Compile Include="Assets\Scripts\Map\TextureGenerator.cs" />
+    <Compile Include="Assets\Scripts\Map\Data\UpdatableData.cs" />
+    <Compile Include="Assets\Scripts\Map\Data\HeightMapSettings.cs" />
+    <Compile Include="Assets\Scripts\Map\Data\MeshSettings.cs" />
+    <Compile Include="Assets\Scripts\Map\MapPreview.cs" />
+    <Compile Include="Assets\Scripts\Map\TerrainChunk.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\RockPathGenerator.cs" />
     <Compile Include="Assets\Scripts\Player\MouseMovement.cs" />
-    <Compile Include="Assets\Scripts\Map\MapGenerator.cs" />
+    <Compile Include="Assets\Scripts\Map\HideOnPlay.cs" />
+    <Compile Include="Assets\Scripts\Traps\RopeHighRope\StickToSurface.cs" />
+    <Compile Include="Assets\Scripts\Traps\RockRope\KnockbackTrap.cs" />
+    <Compile Include="Assets\Scripts\Traps\RockRope\SwingTrap.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\FlyLandMovement.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\RockController.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerMovement.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\FlyLand.cs" />
+    <Compile Include="Assets\Scripts\Traps\SpringPlatform.cs" />
+    <Compile Include="Assets\Scripts\FlyLand\RockMovement.cs" />
+    <Compile Include="Assets\Scripts\Map\TerrainGenerator.cs" />
+    <Compile Include="Assets\Scripts\Traps\ColumnPush.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Scripts\Map\Terrain.shader" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="UnityEngine">
@@ -903,6 +931,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Assembly-CSharp-firstpass.csproj" />
     <ProjectReference Include="Unity.Timeline.csproj" />
     <ProjectReference Include="Unity.TestTools.CodeCoverage.Editor.OpenCover.Mono.Reflection.csproj" />
     <ProjectReference Include="UnityEngine.UI.csproj" />
