@@ -2,33 +2,27 @@
 
 public class SwingTrap : MonoBehaviour
 {
-    public float swingSpeed = 2f;  // Tốc độ đung đưa
-    public float swingAngle = 45f; // Góc đung đưa tối đa
+    public float swingSpeed = 1.5f; // Tốc độ đung đưa
+    public float swingAngle = 45f; // Góc đung đưa tối đa (theo độ)
+    
+    private Quaternion startRotation; // Vị trí ban đầu
+    private float time;
 
-    private float currentAngle = 0f;
-    private bool swingingForward = true;
+    void Start()
+    {
+        // Lưu trữ vị trí ban đầu
+        startRotation = transform.localRotation;
+    }
 
     void Update()
     {
-        float angleChange = swingSpeed * Time.deltaTime;
-        if (swingingForward)
-        {
-            currentAngle += angleChange;
-            if (currentAngle >= swingAngle)
-            {
-                swingingForward = false; // Đổi hướng
-            }
-        }
-        else
-        {
-            currentAngle -= angleChange;
-            if (currentAngle <= -swingAngle)
-            {
-                swingingForward = true; // Đổi hướng
-            }
-        }
+        // Tính toán góc đung đưa theo thời gian (dùng hàm sin)
+        float angle = Mathf.Sin(time * swingSpeed) * swingAngle;
 
-        // Xoay quanh trục Z
-        transform.localRotation = Quaternion.Euler(0f, 0f, currentAngle);
+        // Áp dụng góc quay cho quả cầu
+        transform.localRotation = startRotation * Quaternion.Euler(angle, 0, 0);
+
+        // Tăng thời gian
+        time += Time.deltaTime;
     }
 }

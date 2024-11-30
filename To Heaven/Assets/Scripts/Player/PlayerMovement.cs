@@ -56,7 +56,6 @@ public class PlayerMovement : MonoBehaviour
         // Tính toán chuyển động tổng
         Vector3 totalMovement = (moveDirection + velocity) * Time.deltaTime;
 
-
         if (currentSwingPlatform != null)
         {
             Vector3 swingPlatformVelocity = currentSwingPlatform.GetPlatformVelocity(transform.position);
@@ -76,7 +75,6 @@ public class PlayerMovement : MonoBehaviour
 
             totalMovement += swingPlatformVelocity * Time.deltaTime;
         }
-
 
         // Thêm chuyển động của mặt phẳng di chuyển (nếu có)
         if (currentMovingPlatform != null)
@@ -100,7 +98,7 @@ public class PlayerMovement : MonoBehaviour
     {
         // Thực hiện Raycast xuống dưới để kiểm tra mặt đất
         RaycastHit hit;
-        float raycastDistance = controller.height / 2 + 0.1f;
+        float raycastDistance = controller.height / 2 + 0.3f; // Điều chỉnh tăng khoảng cách raycast
 
         if (Physics.SphereCast(transform.position, controller.radius, Vector3.down, out hit, raycastDistance, groundMask))
         {
@@ -134,7 +132,7 @@ public class PlayerMovement : MonoBehaviour
         // Áp dụng giá trị vận tốc Y nhỏ để giữ nhân vật trên mặt đất
         if (isGrounded && velocity.y < 0)
         {
-            velocity.y = -2f;
+            velocity.y = -5f; // Giá trị lớn hơn để giữ nhân vật ổn định
         }
 
         // Cập nhật tham số Animator cho trạng thái trên mặt đất
@@ -151,50 +149,42 @@ public class PlayerMovement : MonoBehaviour
         // Tính toán hướng di chuyển dựa trên camera
         Vector3 direction = new Vector3(x, 0f, z).normalized;
 
-        // Chỉ tiến hành nếu có input
         if (direction.magnitude >= 0.1f)
         {
             // Tính góc xoay mục tiêu dựa trên hướng di chuyển và camera
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cameraTransform.eulerAngles.y;
             float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
 
-            // Xoay nhân vật theo hướng di chuyển
+            // Xoay nhân vật theo hướng di chuyển (chỉ xoay nếu không đang rơi tự do)
             transform.rotation = Quaternion.Euler(0f, angle, 0f);
 
             // Xác định hướng di chuyển
             Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
 
-            // Xác định tốc độ hiện tại (đi bộ hoặc chạy)
-            bool isRunning = Input.GetKey(KeyCode.LeftShift);
-            float currentSpeed = isRunning ? runSpeed : speed;
-
-            // Xác định trạng thái Animator dựa trên hướng di chuyển
-            if (z < 0) // Di chuyển lùi
-            {
-                currentSpeed = speed; // Tốc độ đi bộ cho di chuyển lùi
-                animator.SetBool("isWalkingBackward", true);
-                animator.SetBool("isWalking", false);
-                animator.SetBool("isRunning", false);
-            }
-            else // Di chuyển tiến
-            {
-                animator.SetBool("isWalkingBackward", false);
-                animator.SetBool("isWalking", !isRunning);
-                animator.SetBool("isRunning", isRunning);
-            }
+            // Xác định tốc độ hiện tại
+            float currentSpeed = isGrounded ? (Input.GetKey(KeyCode.LeftShift) ? runSpeed : speed) : speed;
 
             // Lưu hướng di chuyển
             moveDirection = moveDir.normalized * currentSpeed;
+
+            // Cập nhật trạng thái Animator nếu nhân vật trên mặt đất
+            if (isGrounded)
+            {
+                animator.SetBool("isWalking", !Input.GetKey(KeyCode.LeftShift));
+                animator.SetBool("isRunning", Input.GetKey(KeyCode.LeftShift));
+            }
         }
         else
         {
-            // Không có input: chuyển sang trạng thái idle
-            animator.SetBool("isWalking", false);
-            animator.SetBool("isRunning", false);
-            animator.SetBool("isWalkingBackward", false);
-
-            // Đặt hướng di chuyển về zero
+            // Dừng di chuyển ngang khi không có input
             moveDirection = Vector3.zero;
+
+            // Tắt các trạng thái di chuyển nếu nhân vật đang trên mặt đất
+            if (isGrounded)
+            {
+                animator.SetBool("isWalking", false);
+                animator.SetBool("isRunning", false);
+            }
         }
     }
 
@@ -221,7 +211,6 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
         if (hit.collider.CompareTag("SwingPlatform"))
@@ -237,7 +226,6 @@ public class PlayerMovement : MonoBehaviour
             currentSwingPlatform = null;
         }
     }
-
 
     // Hàm xử lý trạng thái rơi và hồi sinh
     void HandleFallingAndRespawn()
@@ -294,10 +282,14 @@ public class PlayerMovement : MonoBehaviour
 
     public void LaunchPlayer(float forceUp, float forceForward)
     {
+        // Áp dụng lực đẩy lên trên
         velocity.y = Mathf.Sqrt(forceUp * -2f * gravity);
-        Vector3 forwardDirection = transform.forward;
-        Vector3 horizontalVelocity = forwardDirection * forceForward;
-        moveDirection += horizontalVelocity;
-        animator.SetTrigger("Launch");
+
+        // Thêm lực đẩy về phía trước dựa trên hướng hiện tại của nhân vật
+        Vector3 forwardDirection = transform.forward * forceForward;
+        moveDirection = forwardDirection;
+
+        // Kích hoạt animation rơi
+        animator.SetBool("isFalling", true);
     }
 }

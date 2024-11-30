@@ -1,14 +1,10 @@
 using UnityEngine;
 
-public class PlaneMoveForward : MonoBehaviour
+public class RockMovement : MonoBehaviour
 {
-    // Tốc độ di chuyển của mặt phẳng
     public float speed = 5f;
-    // Tốc độ hướng lên trên (chiều cao dần)
     public float verticalSpeed = 1f;
-    // Khoảng cách di chuyển tối đa của mặt phẳng
     public float maxDistance = 20f;
-
     private Vector3 startPosition;
     private bool isMovingForward = true;
 
@@ -18,7 +14,6 @@ public class PlaneMoveForward : MonoBehaviour
 
     void Start()
     {
-        // Lưu lại vị trí ban đầu của mặt phẳng
         startPosition = transform.position;
         lastPosition = transform.position;
     }
@@ -26,7 +21,7 @@ public class PlaneMoveForward : MonoBehaviour
     void Update()
     {
         // Tính toán vector di chuyển tiến về phía trước và hướng lên trên
-        Vector3 moveDirection = transform.forward * speed * Time.deltaTime;
+        Vector3 moveDirection = transform.right * speed * Time.deltaTime;
         Vector3 verticalMovement = transform.up * verticalSpeed * Time.deltaTime;
         Vector3 movement;
 
@@ -63,5 +58,23 @@ public class PlaneMoveForward : MonoBehaviour
     public Vector3 GetPlatformVelocity()
     {
         return platformVelocity;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // Kiểm tra va chạm với nhân vật
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            collision.transform.SetParent(transform);
+        }
+    }
+
+    private void OnCollisionExit(Collision collision)
+    {
+        // Khi nhân vật rời khỏi vật thể, ngắt liên kết
+        if (collision.gameObject.CompareTag("Player"))
+        {
+            collision.transform.SetParent(null);
+        }
     }
 }
